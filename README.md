@@ -24,3 +24,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 ## Contributing
 
 This is my submission. 
+
+## Attributions
+
+Adopted Progress Bar code from the following sample: https://codepen.io/holdencreative/pen/vEVbwv
