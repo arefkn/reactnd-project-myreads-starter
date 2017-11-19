@@ -1,30 +1,38 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const Book = ({ title, authors, coverUrl, shelves, currentShelf }) => {
+const Book = (props) => {
+  const { book, shelves, moveBook } = props;
+  const { title, authors, shelf, imageLinks } = book;
   return (
-    <div className="book">
-      <div className="book-top">
-        <div className="book-cover" style={{ width: 128, height: 193, backgroundImage: `url('${coverUrl}')` }}></div>
-        <div className="book-shelf-changer">
-          <select defaultValue={currentShelf}>
-            <option value="none" disabled>Move to...</option>
-            {shelves.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
-          </select>
+    <li>
+      <div className="book">
+        <div className="book-top">
+          <div className="book-cover" style={{ width: 128, height: 193, backgroundImage: `url('${imageLinks.thumbnail}')` }}></div>
+          <div className="book-shelf-changer">
+            <select
+              defaultValue={shelf ? shelf : "none"}
+              onChange={(e) => {
+                e.preventDefault();
+                moveBook(book, e.target.value);
+              }}
+            >
+              <option value="none" disabled>Move to...</option>
+              {shelves.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
+            </select>
+          </div>
         </div>
+        <div className="book-title">{title}</div>
+        <div className="book-authors">{authors ? authors.join(", ") : "Unknown"}</div>
       </div>
-      <div className="book-title">{title}</div>
-      <div className="book-authors">{authors.join(", ")}</div>
-    </div>
+    </li>
   );
 };
 
 Book.propTypes = {
-  title: PropTypes.string.isRequired,
-  authors: PropTypes.arrayOf(PropTypes.string).isRequired,
-  coverUrl: PropTypes.string.isRequired,
+  book: PropTypes.object,
   shelves: PropTypes.arrayOf(PropTypes.object).isRequired,
-  currentShelf: PropTypes.string.isRequired,
+  moveBook: PropTypes.func
 };
 
 export default Book;
