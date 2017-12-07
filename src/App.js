@@ -4,7 +4,7 @@ import * as BooksAPI from './BooksAPI'
 import './App.css'
 import Shelf from './Shelf'
 import Book from './Book'
-
+import { debounce } from 'throttle-debounce';
 import ProgressBar from './ProgressBar';
 
 class BooksApp extends React.Component {
@@ -12,11 +12,6 @@ class BooksApp extends React.Component {
     loading: true,
     books: [],
     searchResults: [],
-    shelves: [
-      { value: "currentlyReading", label: "Currently Reading" },
-      { value: "wantToRead", label: "Want to Read" },
-      { value: "read", label: "Read" },
-    ]
   }
 
   constructor() {
@@ -24,6 +19,7 @@ class BooksApp extends React.Component {
 
     this.moveBook = this.moveBook.bind(this);
     this.search = this.search.bind(this);
+    this.searchApiCall = debounce(500, this.searchApiCall.bind(this));
   }
 
   componentDidMount() {
@@ -41,14 +37,24 @@ class BooksApp extends React.Component {
 
   search(e) {
     const searchQuery = e.target.value;
-
     e.preventDefault();
     this.setState({ loading: true });
+    this.searchApiCall(searchQuery);
+  }
+
+  searchApiCall(searchQuery) {
     BooksAPI.search(searchQuery).then(searchResults => this.setState({ searchResults: searchResults || [], loading: false }));
   }
 
+
   render() {
-    const { books, searchResults, shelves, loading, searchQuery } = this.state;
+    const { books, searchResults, loading } = this.state;
+
+    const shelves = [
+      { value: "currentlyReading", label: "Currently Reading" },
+      { value: "wantToRead", label: "Want to Read" },
+      { value: "read", label: "Read" },
+    ];
 
     return (
       <div className="app">
@@ -94,15 +100,18 @@ class BooksApp extends React.Component {
                 <ol className="books-grid">
                   {searchResults && searchResults.length && searchResults.length > 0
                     ?
-                    searchResults.map(((book) =>
-                      <Book
+                    searchResults.map(((searchResult) => {
+                      const existingBooks = books.filter((b) => b.id === searchResult.id); // do we have this on a shelf?
+                      const book = existingBooks[0] || searchResult;
+                      return (<Book
                         {...{
                           book,
                           shelves,
                           moveBook: this.moveBook,
                           key: book.id
                         }}
-                      />
+                      />);
+                    }
                     ))
                     : searchResults.error
                   }
